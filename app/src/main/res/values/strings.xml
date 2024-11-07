@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Sensory App</string>
+    <string name="average_db">Average dB:</string>
+    <string name="db">dB:</string>
+    <string name="start">Start</string>
+    <string name="stop">Stop</string>
 </resources>

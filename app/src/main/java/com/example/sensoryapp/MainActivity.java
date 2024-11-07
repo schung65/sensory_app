@@ -1,6 +1,13 @@
 package com.example.sensoryapp;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.Message;
+import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -8,7 +15,14 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import java.io.File;
+
 public class MainActivity extends AppCompatActivity {
+
+    private MyMediaRecorder mRecorder;
+    private static final int msgWhat = 0x1001;
+    private static final int refreshTime = 100;
+    private boolean isRecording = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,6 +33,26 @@ public class MainActivity extends AppCompatActivity {
             Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
+        });
+
+        mRecorder = new MyMediaRecorder();
+        Button startStopButton = findViewById(R.id.startStopButton);
+        if (isRecording) {
+            startStopButton.setText(R.string.stop);
+        } else {
+            startStopButton.setText(R.string.start);
+        }
+
+        startStopButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isRecording = !isRecording;
+                if (isRecording) {
+                    mRecorder.stopRecording();
+                } else {
+                    mRecorder.startRecording();
+                }
+            }
         });
     }
 }
