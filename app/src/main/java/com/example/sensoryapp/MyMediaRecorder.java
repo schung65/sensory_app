@@ -16,7 +16,7 @@ public class MyMediaRecorder {
             try {
                 return mMediaRecorder.getMaxAmplitude();
             } catch (IllegalArgumentException e) {
-                Log.e("MyMediaRecorder", "getMaxAmplitude: ", e);
+                Log.e("MyMediaRecorder", "getMaxAmplitude", e);
                 return 0;
             }
         } else {
@@ -32,9 +32,9 @@ public class MyMediaRecorder {
         this.myRecAudioFile = myRecAudioFile;
     }
 
-    public void startRecording(){
+    public boolean startRecording(){
         if (myRecAudioFile == null) {
-            return;
+            return false;
         }
         try {
             mMediaRecorder = new MediaRecorder();
@@ -47,18 +47,23 @@ public class MyMediaRecorder {
             mMediaRecorder.prepare();
             mMediaRecorder.start();
             isRecording = true;
+            return true;
         } catch(IOException exception) {
             mMediaRecorder.reset();
             mMediaRecorder.release();
             mMediaRecorder = null;
             isRecording = false ;
-            Log.e("MyMediaRecorder", "startRecorder: ", exception);
+            Log.e("MyMediaRecorder", "startRecording", exception);
         }catch(IllegalStateException e){
             stopRecording();
-            Log.e("MyMediaRecorder", "startRecorder: ", e);
+            Log.e("MyMediaRecorder", "startRecording", e);
             isRecording = false ;
         }
+        return false;
     }
+
+
+
 
     public void stopRecording() {
         if (mMediaRecorder != null){
@@ -67,7 +72,7 @@ public class MyMediaRecorder {
                     mMediaRecorder.stop();
                     mMediaRecorder.release();
                 }catch(Exception e){
-                    Log.e("MyMediaRecorder", "stopRecording: ", e);
+                    e.printStackTrace();
                 }
             }
             mMediaRecorder = null;
@@ -75,14 +80,14 @@ public class MyMediaRecorder {
         }
     }
 
+
+
+
     public void delete() {
         stopRecording();
         if (myRecAudioFile != null) {
-            if (myRecAudioFile.delete()) {
-                myRecAudioFile = null;
-            } else {
-                Log.e("MyMediaRecorder", "delete: ", new Exception("Failed to delete audio file"));
-            }
+            myRecAudioFile.delete();
+            myRecAudioFile = null;
         }
     }
 }
