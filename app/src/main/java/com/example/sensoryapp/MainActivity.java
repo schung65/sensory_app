@@ -10,6 +10,7 @@ import android.util.Log;
 import android.Manifest;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
@@ -22,18 +23,27 @@ import androidx.core.view.WindowInsetsCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.CircularBounds;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.api.net.SearchNearbyRequest;
 
 import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private FusedLocationProviderClient fusedLocationClient;
+    private List<Place> recommendations;
+    private GoogleMap map;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,14 +63,42 @@ public class MainActivity extends AppCompatActivity {
                     LOCATION_PERMISSION_REQUEST_CODE);
         }
 
+        // Get the SupportMapFragment and request notification when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+
+        initPlaces();
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
 
         ((Button)findViewById(R.id.searchButton)).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                getLastLocation();
+                String searchKeywords = ((EditText)findViewById(R.id.placeTypeInput)).getText().toString();
+                searchNearby(searchKeywords.split(", "));
             }
         });
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            fusedLocationClient.getLastLocation()
+                    .addOnSuccessListener(this, new OnSuccessListener<Location>() {
+                        @Override
+                        public void onSuccess(Location location) {
+                            double lat = location.getLatitude();
+                            double lng = location.getLongitude();
+                            LatLng center = new LatLng(lat, lng);
+                            googleMap.moveCamera(CameraUpdateFactory.newLatLng(center));
+                            googleMap.setMinZoomPreference(15);
+                        }
+                    });
+        };
     }
 
     private void initPlaces() {
@@ -76,12 +114,6 @@ public class MainActivity extends AppCompatActivity {
 
         // Initialize the SDK
         Places.initializeWithNewPlacesApiEnabled(getApplicationContext(), apiKey);
-
-        // Create a new PlacesClient instance
-        PlacesClient placesClient = Places.createClient(this);
-
-        // Define a list of fields to include in the response for each returned place.
-        final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.DISPLAY_NAME);
     }
 
     @Override
@@ -94,20 +126,48 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void getLastLocation() {
+    private void searchNearby(String[] keywords) {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             fusedLocationClient.getLastLocation()
                     .addOnSuccessListener(this, new OnSuccessListener<Location>() {
                         @Override
                         public void onSuccess(Location location) {
+                            LatLng center = new LatLng(0,0);
                             // Got last known location. In some rare situations this can be null.
                             if (location != null) {
-                                String lat = String.valueOf(location.getLatitude());
-                                String lng = String.valueOf(location.getLongitude());
-                                ((TextView)findViewById(R.id.locationText)).setText("(" + lat + ", " + lng + ")");
+                                double lat = location.getLatitude();
+                                double lng = location.getLongitude();
+                                center = new LatLng(lat, lng);
                             }
+                            CircularBounds circle = CircularBounds.newInstance(center, 1000);
+                            final List<String> includedTypes = Arrays.asList(keywords);
+
+                            final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.DISPLAY_NAME, Place.Field.LOCATION);
+                            final SearchNearbyRequest searchNearbyRequest =
+                                    SearchNearbyRequest.builder(/* location restriction = */ circle, placeFields)
+                                            .setIncludedTypes(includedTypes)
+                                            .setMaxResultCount(10)
+                                            .build();
+
+                            PlacesClient placesClient = Places.createClient(getApplicationContext());
+                            placesClient.searchNearby(searchNearbyRequest)
+                                    .addOnSuccessListener(response -> {
+                                        recommendations = response.getPlaces();
+                                        refreshMap();
+                                    });
                         }
                     });
         }
     }
+
+    private void refreshMap() {
+        if (map != null) {
+            for (Place place : recommendations) {
+                map.addMarker(new MarkerOptions()
+                    .position(place.getLocation())
+                    .title("Marker"));
+            }
+        }
+    }
+
 }
