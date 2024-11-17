@@ -47,6 +47,8 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
     implementation(platform(libs.kotlin.bom))
     implementation(libs.places)
+    implementation(libs.play.services.maps)
+
 }
 
 secrets {
