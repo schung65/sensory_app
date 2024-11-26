@@ -1,0 +1,209 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".WellnessDataActivity"
+    android:background="@color/white">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/topAppBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <com.google.android.material.appbar.MaterialToolbar
+            style="@style/appBar"
+            android:id="@+id/topAppBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:minHeight="?attr/actionBarSize"
+            app:navigationIcon="@drawable/ic_arrow_back"/>
+
+    </com.google.android.material.appbar.AppBarLayout>
+    <com.google.android.flexbox.FlexboxLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginVertical="12dp"
+        android:layout_marginHorizontal="32dp"
+        app:flexDirection="column"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        app:justifyContent="space_between">
+
+        <TextView
+            style="@style/heading1"
+            android:id="@+id/myWellnessDataText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/my_wellness_data"/>
+
+        <com.google.android.flexbox.FlexboxLayout
+            style="@style/orangeLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexDirection="row"
+            app:justifyContent="space_between">
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/gpsLocationLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/gps_location" />
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/gpsLocationValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/todo" />
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <com.google.android.flexbox.FlexboxLayout
+            style="@style/orangeLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexDirection="row"
+            app:justifyContent="space_between">
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/soundLevelLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/sound_level" />
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/soundLevelValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/todo" />
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <com.google.android.flexbox.FlexboxLayout
+            style="@style/orangeLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexDirection="row"
+            app:justifyContent="space_between">
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/nearbyDevicesLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/devices_nearby" />
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/nearbyDevicesValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/todo" />
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <com.google.android.flexbox.FlexboxLayout
+            style="@style/orangeLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexDirection="row"
+            app:justifyContent="space_between">
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/motionLevelLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/motion_level" />
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/motionLevelValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/todo" />
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <TextView
+            style="@style/heading1"
+            android:id="@+id/historicalDataText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/historical_data"/>
+
+        <com.google.android.flexbox.FlexboxLayout
+            style="@style/lightGrayLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexDirection="row"
+            app:justifyContent="space_between">
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/lastHourLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/last_hour" />
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/lastHourValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/todo" />
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <com.google.android.flexbox.FlexboxLayout
+            style="@style/lightGrayLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexDirection="row"
+            app:justifyContent="space_between">
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/lastTwoHoursLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/last_2_hours" />
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/lastTwoHoursValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/todo" />
+
+        </com.google.android.flexbox.FlexboxLayout>
+
+        <com.google.android.flexbox.FlexboxLayout
+            style="@style/lightGrayLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:flexDirection="row"
+            app:justifyContent="space_between">
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/lastThreeHoursValue"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/last_3_hours" />
+
+            <TextView
+                style="@style/subtitle1"
+                android:id="@+id/lastThreeHoursLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/todo" />
+
+        </com.google.android.flexbox.FlexboxLayout>
+    </com.google.android.flexbox.FlexboxLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
