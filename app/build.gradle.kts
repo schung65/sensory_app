@@ -5,11 +5,11 @@ plugins {
 
 android {
     namespace = "com.example.sensoryapp"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.example.sensoryapp"
-        minSdk = 21
+        minSdk = 26
         targetSdk = 34
         versionCode = 1
         versionName = "1.0"
@@ -37,7 +37,6 @@ android {
 }
 
 dependencies {
-
     implementation(libs.appcompat)
     implementation(libs.material)
     implementation(libs.activity)
@@ -48,6 +47,7 @@ dependencies {
     implementation(libs.play.services.maps)
     implementation(libs.google.flexbox)
     implementation(libs.material.vversion)
+    implementation(libs.work.runtime)
 }
 
 secrets {
