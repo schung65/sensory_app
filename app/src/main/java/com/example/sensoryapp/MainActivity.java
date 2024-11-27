@@ -55,10 +55,9 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void scheduleSoundWorker() {
-        OneTimeWorkRequest soundWorkRequest = new OneTimeWorkRequest.Builder(SoundLevelService.class)
+        OneTimeWorkRequest soundWorkRequest = new OneTimeWorkRequest.Builder(SoundWorker.class)
                 .setInitialDelay(5, TimeUnit.SECONDS)
                 .build();
-
         WorkManager.getInstance(this).enqueue(soundWorkRequest);
     }
 }
