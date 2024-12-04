@@ -11,6 +11,7 @@ constraintlayout = "2.1.4"
 materialVersion = "<version>"
 playServicesMaps = "19.0.0"
 workRuntime = "2.10.0"
+places = "4.1.0"
 
 [libraries]
 flexbox = { module = "com.google.android:flexbox", version.ref = "flexbox" }
@@ -25,6 +26,7 @@ constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayo
 material-vversion = { module = "com.google.android.material:material", version.ref = "materialVersion" }
 play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 work-runtime = { module = "androidx.work:work-runtime", version.ref = "workRuntime" }
+places = { group = "com.google.android.libraries.places", name = "places", version.ref = "places" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

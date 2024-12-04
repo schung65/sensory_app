@@ -26,6 +26,8 @@ import java.util.Set;
 public class SettingsActivity extends AppCompatActivity {
     private Set<String> selectedUnderstimOptions = new HashSet<>();
     private Set<String> selectedOverstimOptions = new HashSet<>();
+    private AlgorithmViewModel algorithmViewModel;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,6 +38,7 @@ public class SettingsActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        algorithmViewModel = SensoryApplication.getAlgorithmViewModel();
 
         findViewById(R.id.editUnderstimPreferences).setOnClickListener(v -> {
             showUnderstimPreferencesDialog();
@@ -96,6 +99,7 @@ public class SettingsActivity extends AppCompatActivity {
                         selectedOptions.setLength(selectedOptions.length() - 2);
                     }
                     ((TextView)findViewById(R.id.understimPreferences)).setText(selectedOptions);
+                    algorithmViewModel.setUnderstimPreferences(selectedUnderstimOptions);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .create()
@@ -142,6 +146,7 @@ public class SettingsActivity extends AppCompatActivity {
                         selectedOptions.setLength(selectedOptions.length() - 2);
                     }
                     ((TextView)findViewById(R.id.overstimPreferences)).setText(selectedOptions);
+                    algorithmViewModel.setOverstimPreferences(selectedOverstimOptions);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .create()
