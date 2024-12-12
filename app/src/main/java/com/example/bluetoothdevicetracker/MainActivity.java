@@ -31,6 +31,8 @@ import java.util.Set;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_PERMISSION_CODE = 1;
+    private static final int RECORDING_DURATION = 5000; // 5 seconds
+    private static final int SAMPLE_INTERVAL = 1000; // Sample every 1000 ms (1 seconds)
     private BluetoothAdapter bluetoothAdapter;
     private BluetoothLeScanner bluetoothLeScanner;
     private Set<String> discoveredDevices;
@@ -91,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
                     break;
                 }
             }
-
             if (allPermissionsGranted) {
                 initializeBluetooth();
             } else {
@@ -119,7 +120,11 @@ public class MainActivity extends AppCompatActivity {
     private void startScanning() {
         // Clear previous results
         deviceList.clear();
-        deviceAdapter.notifyDataSetChanged();
+        discoveredDevices.clear(); // Reset discovered devices set
+        deviceAdapter.notifyDataSetChanged(); // Notify adapter to update the RecyclerView
+
+        // Reset the device count display
+        uniqueDeviceCountText.setText("Unique Devices: 0");
 
         // Set scan mode to low latency
         ScanSettings scanSettings = new ScanSettings.Builder()
@@ -174,3 +179,4 @@ public class MainActivity extends AppCompatActivity {
         uniqueDeviceCountText.setText("Unique Devices: " + uniqueDeviceCount);
     }
 }
+
