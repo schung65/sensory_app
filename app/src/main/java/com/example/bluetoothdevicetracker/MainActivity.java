@@ -1,15 +1,22 @@
 package com.example.bluetoothdevicetracker;
 
 import android.Manifest;
+import android.app.Service;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.bluetooth.le.ScanSettings;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
+import android.os.PowerManager;
 import android.util.Log;
 import android.widget.Button;
 import android.widget.TextView;
@@ -43,53 +50,9 @@ public class MainActivity extends AppCompatActivity {
     private DeviceAdapter deviceAdapter;
     private List<String> deviceList = new ArrayList<>();
     private Button btnScan;
-    private final String[] PHONE_OUI_PREFIXES = {
-            "00:1C:B3",  // Apple (iPhone)
-            "00:1E:C2",  // Apple (iPhone)
-            "00:1A:2B",  // Apple (iPhone)
-            "00:23:12",  // Apple (iPhone)
-            "D8:5D:4C",  // Apple (iPhone)
-            "F8:4F:EE",  // Apple (iPhone)
-            "F8:6A:34",  // Apple (iPhone)
+    private PowerManager.WakeLock wakeLock;
 
-            "00:1E:6A",  // Samsung (Android)
-            "18:3D:A2",  // Samsung (Android)
-            "00:14:22",  // Samsung (Android)
-            "24:54:99",  // Samsung (Android)
-            "D8:5D:9D",  // Samsung (Android)
-            "60:9E:4C",  // Samsung (Android)
-            "D0:8D:1C",  // Samsung (Android)
-
-            "18:66:DC",  // Google (Pixel)
-            "AC:8D:3A",  // Google (Pixel)
-
-            "00:1A:2B",  // Huawei (Android)
-            "00:23:71",  // Huawei (Android)
-            "88:88:88",  // Huawei (Android)
-
-            "00:14:02",  // LG (Android)
-            "58:5C:69",  // LG (Android)
-            "F0:57:30",  // LG (Android)
-
-            "38:2C:4A",  // Xiaomi (Android)
-            "24:59:2F",  // Xiaomi (Android)
-            "98:5F:30",  // Xiaomi (Android)
-            "B0:6F:6D",  // Xiaomi (Android)
-
-            "00:24:1D",  // Sony (Android)
-            "00:26:49",  // Sony (Android)
-
-            "00:0F:66",  // Motorola (Android)
-            "00:1B:87",  // Motorola (Android)
-            "88:6B:2F",  // Motorola (Android)
-
-            "5C:68:1D",  // OnePlus (Android)
-            "A0:86:35",  // OnePlus (Android)
-
-            "00:19:E0",  // HTC (Android)
-            "00:25:BB",  // HTC (Android)
-            "60:6A:5B",  // HTC (Android)
-    };
+    // Update the device list (called by the service when devices are found)
 
     private final String[] DEVICE_OUI_PREFIXES = {
             "00:1C:B3", "00:1E:C2", "00:1A:2B", "D8:5D:4C", "F8:4F:EE", "F8:6A:34", // Apple (Phone, Watch)
@@ -266,13 +229,12 @@ public class MainActivity extends AppCompatActivity {
         uniqueDeviceCountText.setText("Unique Devices: " + uniqueDeviceCount);
     }
 
-    // Update the count for unique phones
     private void updatePhoneCount() {
         int uniquePhoneCount = discoveredPhones.size();
         uniquePhoneCountText.setText("Unique Phones, Smartwatches, earphones: " + uniquePhoneCount);
     }
 
-    // Method to check if the MAC address belongs to a phone
+    // check if the MAC address belongs to a phone
     private boolean isPhoneDevice(String macAddress, String deviceName) {
         for (String prefix : DEVICE_OUI_PREFIXES) {
             if (macAddress.startsWith(prefix)) {
@@ -284,5 +246,39 @@ public class MainActivity extends AppCompatActivity {
         }
         return false;
     }
+
+    public void updateDeviceList(String deviceInfo) {
+        deviceList.add(deviceInfo);  // Add the device to the list
+        deviceAdapter.notifyDataSetChanged();  // Notify the adapter to refresh the RecyclerView
+    }
+    private BroadcastReceiver deviceFoundReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String deviceInfo = intent.getStringExtra("deviceInfo");
+            if (deviceInfo != null) {
+                updateDeviceList(deviceInfo);  // Update the device list in the UI
+            }
+        }
+    };
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        // Register the receiver to listen for the broadcast
+        IntentFilter filter = new IntentFilter("BLUETOOTH_DEVICE_FOUND");
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            registerReceiver(deviceFoundReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        // Unregister the receiver to prevent memory leaks
+        unregisterReceiver(deviceFoundReceiver);
+    }
+
 }
+
+
 
