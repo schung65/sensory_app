@@ -22,6 +22,8 @@ import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.bluetoothdevicetracker.R;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
