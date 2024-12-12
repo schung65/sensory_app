@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.google.flexbox)
     implementation(libs.material.vversion)
     implementation(libs.work.runtime)
+    implementation(libs.core)
 }
 
 secrets {

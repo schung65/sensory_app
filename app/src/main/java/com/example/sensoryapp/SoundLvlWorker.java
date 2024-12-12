@@ -13,6 +13,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.core.app.NotificationCompat;
 import androidx.work.CoroutineWorker;
+import androidx.work.Data;
 import androidx.work.ForegroundInfo;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkManager;
@@ -61,22 +62,24 @@ public class SoundLvlWorker extends CoroutineWorker {
             public void run() {
                 if (System.currentTimeMillis() < endTime) {
                     float amplitude = getMaxAmplitude();
-                    Log.d("SoundWorker", "Sampled amplitude: " + amplitude);
                     if (amplitude == 0) {
                         Log.d("SoundWorker", "failed");
                     } else {
                         if(amplitude > 0 && amplitude < 1000000) {
-                            World.setDbCount(20 * (float)(Math.log10(amplitude)));
-                            totalAmplitude[0] += World.dbCount;
+                            SensoryApplication.setDbCount(20 * (float)(Math.log10(amplitude)));
+                            totalAmplitude[0] += SensoryApplication.dbCount;
                             sampleCount[0]++;
-                            Log.d("SoundWorker", "got dB " + String.valueOf(World.dbCount));
                         }
                     }
                     handler.postDelayed(this, SAMPLE_INTERVAL);
                 } else {
-                    float averageDb = sampleCount[0] > 0 ? totalAmplitude[0] / sampleCount[0] : 0;
-                    Log.d("SoundWorker", "Average dB level: " + averageDb);
                     stopRecording();
+                    float averageDb = sampleCount[0] > 0 ? totalAmplitude[0] / sampleCount[0] : 0;
+                    Data outputData = new Data.Builder()
+                            .putFloat("averageDb", averageDb)
+                            .build();
+                    Log.d("SoundWorker", "Average dB level: " + averageDb);
+                    SensoryApplication.setAverageDbCount(averageDb);
                 }
             }
         };
@@ -194,5 +197,9 @@ public class SoundLvlWorker extends CoroutineWorker {
             wakeLock.release();
             Log.d("SoundWorker", "WakeLock released");
         }
+    }
+
+    public interface SoundCallback {
+        void onAverageDecibelAvailable(float averageDb);
     }
 }

@@ -1,9 +1,13 @@
 package com.example.sensoryapp;
 
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MenuItem;
@@ -18,6 +22,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.collection.CircularArray;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -44,11 +50,13 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int REQUEST_PERMISSION_CODE = 200;
     private static final String KEY_CAMERA_POSITION = "camera_position";
     private static final String KEY_LOCATION = "location";
+    private static final String CHANNEL_ID = "sensory_app_notif_channel";
 
     private boolean permissionsAccepted = false;
     private final String [] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION};
 
     private AlgorithmViewModel algorithmViewModel;
+    private NotificationManager mNotificationManager;
 
     private GoogleMap map;
     private CircularArray<Place> recommendedPlaces;
@@ -66,6 +74,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         ActivityCompat.requestPermissions(this, permissions, REQUEST_PERMISSION_CODE);
         initViewModel();
+        createNotificationChannel();
 
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager().findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
@@ -138,6 +147,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 recommendedPlaces = placeCircularArray;
             }
         });
+        algorithmViewModel.getMood().observe(this, new Observer<String>() {
+            @Override
+            public void onChanged(String s) {
+                showNotification(s);
+            }
+        });
     }
 
     @Override
@@ -176,5 +191,31 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         if (mapIntent.resolveActivity(getPackageManager()) != null) {
             startActivity(mapIntent);
         }
+    }
+
+    private void createNotificationChannel() {
+        CharSequence name = "Notification Channel";
+        String description = "Channel for sending mood notifications from Sensory Application";
+        int importance = NotificationManager.IMPORTANCE_DEFAULT;
+        NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+        channel.setDescription(description);
+        channel.setLockscreenVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        mNotificationManager = getSystemService(NotificationManager.class);
+        mNotificationManager.createNotificationChannel(channel);
+    }
+
+    private void showNotification(String s) {
+        Intent intent = new Intent(this, MainActivity.class);
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_exclamation_mark)
+                .setContentTitle("You might be feeling " + s.toLowerCase())
+                .setContentText("Click here for more info!")
+                .setContentIntent(pendingIntent)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+                .setAutoCancel(true)
+                .setVisibility(NotificationCompat.VISIBILITY_PUBLIC);
+        mNotificationManager.notify(100, builder.build());
     }
 }

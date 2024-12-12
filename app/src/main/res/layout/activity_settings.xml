@@ -191,6 +191,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/min">
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/minSoundEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         />
@@ -201,6 +202,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/max">
                     <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/maxSoundEditText"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         />

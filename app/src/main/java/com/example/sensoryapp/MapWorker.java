@@ -1,10 +1,12 @@
 package com.example.sensoryapp;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.location.Location;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -16,6 +18,8 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.CircularBounds;
 import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.PlaceLikelihood;
+import com.google.android.libraries.places.api.net.FindCurrentPlaceRequest;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.api.net.SearchNearbyRequest;
 
@@ -47,7 +51,7 @@ public class MapWorker {
                 }
             });
         } catch (SecurityException e) {
-            Log.e("Exception: %s", e.getMessage(), e);
+            Log.e("MapWorker", e.getMessage(), e);
         }
     }
 
@@ -69,11 +73,49 @@ public class MapWorker {
                     });
     }
 
+    public void detectCurrentPlaceType(PlaceTypeCallback callback) {
+        try {
+            fusedLocationProviderClient.getLastLocation()
+                    .addOnSuccessListener(location -> {
+                        if (location != null) {
+                            List<Place.Field> placeFields = Arrays.asList(Place.Field.DISPLAY_NAME, Place.Field.TYPES);
+                            FindCurrentPlaceRequest request = FindCurrentPlaceRequest.newInstance(placeFields);
+
+                            placesClient.findCurrentPlace(request)
+                                .addOnSuccessListener(response -> {
+                                    Place mostLikelyPlace = null;
+                                    double maxLikelihood = 0;
+                                    for (PlaceLikelihood placeLikelihood : response.getPlaceLikelihoods()) {
+                                        Place place = placeLikelihood.getPlace();
+                                        double likelihood = placeLikelihood.getLikelihood();
+                                        if (likelihood > maxLikelihood) {
+                                            maxLikelihood = likelihood;
+                                            mostLikelyPlace = place;
+                                        }
+                                    }
+                                    if (mostLikelyPlace != null) {
+                                        String type = mostLikelyPlace.getPrimaryType();
+                                        callback.onPlaceTypeDetected(type);
+                                    }
+                                });
+                        } else {
+                            Log.d("MapWorker", "Couldn't find current place");
+                        }
+                    });
+        } catch (SecurityException e) {
+            Log.e("MapWorker", e.getMessage(), e);
+        }
+    }
+
     public interface LocationCallback {
         void onLocationAvailable(Location location);
     }
 
     public interface PlacesCallback {
         void onNearbyPlacesAvailable(List<Place> places);
+    }
+
+    public interface PlaceTypeCallback {
+        void onPlaceTypeDetected(String type);
     }
 }

@@ -30,4 +30,7 @@
     <string name="park">Park</string>
     <string name="bowling">Bowling</string>
     <string name="gym">Gym</string>
+    <string name="overstimulated">Overstimulated</string>
+    <string name="understimulated">Understimulated</string>
+    <string name="good">Good</string>
 </resources>
