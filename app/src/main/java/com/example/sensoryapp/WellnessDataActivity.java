@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,6 +16,8 @@ import androidx.core.view.WindowInsetsCompat;
 import com.google.android.material.appbar.MaterialToolbar;
 
 public class WellnessDataActivity extends AppCompatActivity {
+    private TextView nearbyDevicesValue;
+    private BluetoothDeviceTracker bluetoothDeviceTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +29,8 @@ public class WellnessDataActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        nearbyDevicesValue = findViewById(R.id.nearbyDevicesValue);
+        bluetoothDeviceTracker = new BluetoothDeviceTracker(this, nearbyDevicesValue);
 
         MaterialToolbar appBar = findViewById(R.id.topAppBar);
         appBar.setNavigationOnClickListener(new View.OnClickListener() {
