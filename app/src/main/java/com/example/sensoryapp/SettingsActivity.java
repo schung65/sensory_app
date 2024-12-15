@@ -26,8 +26,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class SettingsActivity extends AppCompatActivity {
-    private Set<String> selectedUnderstimOptions = new HashSet<>();
-    private Set<String> selectedOverstimOptions = new HashSet<>();
+    private Set<String> selectedUnderstimOptions;
+    private Set<String> selectedOverstimOptions;
     private AlgorithmViewModel algorithmViewModel;
 
     @Override
@@ -40,6 +40,8 @@ public class SettingsActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        selectedUnderstimOptions =  SensoryApplication.getUnderstimOptions();
+        selectedOverstimOptions = SensoryApplication.getOverstimOptions();
         algorithmViewModel = SensoryApplication.getAlgorithmViewModel();
 
         findViewById(R.id.editUnderstimPreferences).setOnClickListener(v -> {
@@ -112,7 +114,7 @@ public class SettingsActivity extends AppCompatActivity {
                         selectedOptions.setLength(selectedOptions.length() - 2);
                     }
                     ((TextView)findViewById(R.id.understimPreferences)).setText(selectedOptions);
-                    algorithmViewModel.setUnderstimPreferences(selectedUnderstimOptions);
+                    SensoryApplication.setUnderstimOptions(selectedUnderstimOptions);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .create()
@@ -159,7 +161,7 @@ public class SettingsActivity extends AppCompatActivity {
                         selectedOptions.setLength(selectedOptions.length() - 2);
                     }
                     ((TextView)findViewById(R.id.overstimPreferences)).setText(selectedOptions);
-                    algorithmViewModel.setOverstimPreferences(selectedOverstimOptions);
+                    SensoryApplication.setOverstimOptions(selectedOverstimOptions);
                 })
                 .setNegativeButton("Cancel", (dialog, which) -> dialog.dismiss())
                 .create()

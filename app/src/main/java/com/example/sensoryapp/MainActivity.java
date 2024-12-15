@@ -15,6 +15,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.Manifest;
+import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -43,8 +44,11 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.material.appbar.AppBarLayout;
 import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.bottomappbar.BottomAppBar;
-
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
     private static final int REQUEST_PERMISSION_CODE = 200;
@@ -53,7 +57,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final String CHANNEL_ID = "sensory_app_notif_channel";
 
     private boolean permissionsAccepted = false;
-    private final String [] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION};
+    private final String [] permissions = {Manifest.permission.RECORD_AUDIO, Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.BLUETOOTH_SCAN};
 
     private AlgorithmViewModel algorithmViewModel;
     private NotificationManager mNotificationManager;
@@ -145,11 +149,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     placeCircularArray.addLast(place);
                 }
                 recommendedPlaces = placeCircularArray;
+                Button declineButton = findViewById(R.id.declineButton);
+                Button acceptButton = findViewById(R.id.acceptButton);
+                if (recommendedPlaces.isEmpty()) {
+                    declineButton.setEnabled(false);
+                    acceptButton.setEnabled(false);
+                } else {
+                    showNextPlace();
+                    declineButton.setEnabled(true);
+                    acceptButton.setEnabled(true);
+                }
             }
         });
         algorithmViewModel.getMood().observe(this, new Observer<String>() {
             @Override
             public void onChanged(String s) {
+                ((TextView) findViewById(R.id.predictionValue)).setText(s);
                 showNotification(s);
             }
         });

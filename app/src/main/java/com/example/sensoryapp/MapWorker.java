@@ -56,6 +56,7 @@ public class MapWorker {
     }
 
     public void searchNearby(String[] keywords, Location location, PlacesCallback callback) {
+        Log.d("MapWorker", "searching nearby");
         final List<Place.Field> placeFields = Arrays.asList(Place.Field.ID, Place.Field.DISPLAY_NAME, Place.Field.LOCATION);
         LatLng center = new LatLng(location.getLatitude(), location.getLongitude());
         CircularBounds circle = CircularBounds.newInstance(center, 1000);
@@ -68,6 +69,7 @@ public class MapWorker {
                                     .build();
         placesClient.searchNearby(searchNearbyRequest)
                     .addOnSuccessListener(response -> {
+                        Log.d("MapWorker", "searching nearby complete");
                         recommendations = response.getPlaces();
                         callback.onNearbyPlacesAvailable(recommendations);
                     });
@@ -99,7 +101,7 @@ public class MapWorker {
                                     }
                                 });
                         } else {
-                            Log.d("MapWorker", "Couldn't find current place");
+                            callback.onPlaceTypeDetected("None");
                         }
                     });
         } catch (SecurityException e) {
