@@ -36,35 +36,27 @@ public class AlgorithmViewModel extends AndroidViewModel {
     private final MutableLiveData<List<Place>> _placesLiveData = new MutableLiveData<>();
     private final MutableLiveData<Float> averageDecibelLiveData = new MutableLiveData<>();
     public final MutableLiveData<String> mood = new MutableLiveData<>("Good");
-    private Set<String> _understimKeywords;
-    private Set<String> _overstimKeywords;
 
     private MapWorker mapWorker;
+    private BluetoothDeviceTracker bleWorker;
 
     public AlgorithmViewModel(@NonNull Application application) {
         super(application);
         workManager = WorkManager.getInstance(application);
         mapWorker = new MapWorker();
+        bleWorker = new BluetoothDeviceTracker(getApplication().getApplicationContext());
     }
 
     public LiveData<List<Place>> getPlacesData() { return _placesLiveData; }
-    public void setUnderstimPreferences(Set<String> preferences) {
-        _understimKeywords = preferences;
-    }
-    public void setOverstimPreferences(Set<String> preferences) {
-        _overstimKeywords = preferences;
-    }
 
     public void init() {
         startSoundWorker();
         mapWorker.init(getApplication().getApplicationContext());
-        getNearbyPlaces(new String[]{"cafe"});
-        predictMood(100, 200);
     }
 
     private void startSoundWorker() {
         OneTimeWorkRequest soundWorkRequest = new OneTimeWorkRequest.Builder(SoundLvlWorker.class)
-                .setInitialDelay(5, TimeUnit.SECONDS)
+                .setInitialDelay(30, TimeUnit.SECONDS)
                 .addTag("SoundLvlWorker")
                 .build();
         WorkManager.getInstance(getApplication().getApplicationContext()).enqueue(soundWorkRequest);
@@ -73,6 +65,12 @@ public class AlgorithmViewModel extends AndroidViewModel {
             if (workInfo != null) {
                 WorkInfo.State state = workInfo.getState();
                 if (state == WorkInfo.State.SUCCEEDED) {
+                    bleWorker.startScanning(new BluetoothDeviceTracker.BleScanCallback() {
+                        @Override
+                        public void onBleScanResultsAvailable(int numPeople) {
+                            predictMood(SensoryApplication.avgDb, numPeople);
+                        }
+                    });
                     startSoundWorker();
                 } else if (state == WorkInfo.State.FAILED) {
                     Log.e("WorkStatus", "Work failed");
@@ -90,24 +88,17 @@ public class AlgorithmViewModel extends AndroidViewModel {
         Log.d("AlgorithmViewModel", "SoundLvlWorker stopped");
     }
 
-    public LiveData<Location> getLocation() {
+    public void getNearbyPlaces(String[] keywords) {
         mapWorker.getDeviceLocation(new MapWorker.LocationCallback() {
             @Override
             public void onLocationAvailable(Location location) {
-                locationLiveData.postValue(location);
-            }
-        });
-        return locationLiveData;
-    }
-
-    public void getNearbyPlaces(String[] keywords) {
-        getLocation().observeForever(new Observer<Location>() {
-            @Override
-            public void onChanged(Location location) {
+                Log.d("AlgorithmViewModel", "onLocationAvailable");
                 if (location != null) {
+                    Log.d("AlgorithmViewModel", "onLocationAvailable " + location);
                     mapWorker.searchNearby(keywords, location, new MapWorker.PlacesCallback() {
                         @Override
                         public void onNearbyPlacesAvailable(List<Place> places) {
+                            Log.d("AlgorithmViewModel", "nearby places available");
                             _placesLiveData.setValue(places);
                         }
                     });
@@ -126,9 +117,13 @@ public class AlgorithmViewModel extends AndroidViewModel {
                 double soundIdx = w * (averageSound / SensoryApplication.soundPref);
                 double peopleIdx = (1 - w) * (numPeople / SensoryApplication.numPeoplePref);
                 double index = soundIdx + peopleIdx;
-                if (index > 1.3 && !getApplication().getString(R.string.overstimulated).equals(mood.getValue())) {
+
+                if (index > 1.3 && mood.getValue() != "Overstimulated") {
+                    String[] options = SensoryApplication.getOverstimOptions().toArray(new String[0]);
+                    getNearbyPlaces(options);
                     mood.setValue(getApplication().getString(R.string.overstimulated));
-                } else if (index < 0.7 && !getApplication().getString(R.string.understimulated).equals(mood.getValue())) {
+                } else if (index < 0.7 && mood.getValue() != "Understimulated") {
+                    getNearbyPlaces(SensoryApplication.getUnderstimOptions().toArray(new String[0]));
                     mood.setValue(getApplication().getString(R.string.understimulated));
                 } else {
                     if (!(getApplication().getString(R.string.good)).equals(mood.getValue())) {

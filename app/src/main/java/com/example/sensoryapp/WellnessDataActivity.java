@@ -29,8 +29,6 @@ public class WellnessDataActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
-        nearbyDevicesValue = findViewById(R.id.nearbyDevicesValue);
-        bluetoothDeviceTracker = new BluetoothDeviceTracker(this, nearbyDevicesValue);
 
         MaterialToolbar appBar = findViewById(R.id.topAppBar);
         appBar.setNavigationOnClickListener(new View.OnClickListener() {

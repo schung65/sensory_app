@@ -5,8 +5,13 @@ import android.bluetooth.le.BluetoothLeScanner;
 import android.bluetooth.le.ScanCallback;
 import android.bluetooth.le.ScanResult;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Handler;
+import android.util.Log;
 import android.widget.TextView;
+
+import androidx.core.app.ActivityCompat;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -19,8 +24,8 @@ public class BluetoothDeviceTracker {
     private BluetoothLeScanner bluetoothLeScanner;
     private Set<String> discoveredDevices;
     private Set<String> allowedMacAddresses;
-    private TextView nearbyDevicesValue;
     private Handler handler;
+    private Context mContext;
 
     private int deviceCount;
 
@@ -50,55 +55,43 @@ public class BluetoothDeviceTracker {
 
             "CE:10"                             // Realtek Bluetooth (headphones/earphones)
     };
-    public BluetoothDeviceTracker(Context context, TextView uniqueDeviceCountText) {
-        this.bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        this.bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
-        this.discoveredDevices = new HashSet<>();
-        this.allowedMacAddresses = new HashSet<>();
-        this.handler = new Handler();
-        this.nearbyDevicesValue = uniqueDeviceCountText;
+
+    public BluetoothDeviceTracker(Context context) {
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
+        discoveredDevices = new HashSet<>();
+        allowedMacAddresses = new HashSet<>();
+        mContext = context;
+        handler = new Handler();
 
         // Add allowed MAC addresses to the set
         for (String mac : DEVICE_OUI_PREFIXES) {
             allowedMacAddresses.add(mac.toUpperCase());
         }
-
-        startScanning();
     }
 
-    private void startScanning() {
+    public void startScanning(BleScanCallback callback) {
+        Log.d("BluetoothDeviceTracker", "starting scan");
         discoveredDevices.clear();
         deviceCount = 0;
-        updateDeviceCount();
-
+        if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
+            Log.d("BluetoothDeviceTracker", "Need permission: BLUETOOTH_SCAN");
+        }
         bluetoothLeScanner.startScan(scanCallback);
-
         handler.postDelayed(() -> {
             bluetoothLeScanner.stopScan(scanCallback);
-            updateDeviceCount();
-            handler.postDelayed(this::startScanning, SCAN_INTERVAL);
+            callback.onBleScanResultsAvailable(discoveredDevices.size());
         }, SCAN_DURATION);
-    }
-
-    private void updateDeviceCount() {
-        nearbyDevicesValue.setText(String.valueOf(deviceCount)); // Show device count
     }
 
     private final ScanCallback scanCallback = new ScanCallback() {
         @Override
         public void onScanResult(int callbackType, ScanResult result) {
-            String deviceName = result.getDevice().getName();
-            String deviceAddress = result.getDevice().getAddress();
-
+            String deviceAddress = result.getDevice().toString().toUpperCase();
+            boolean matchesPrefix = allowedMacAddresses.stream().anyMatch(deviceAddress::startsWith);
             // Check if device is unique and either has a valid name or belongs to allowed MAC addresses
-            if (deviceName != null && !deviceName.isEmpty() && !discoveredDevices.contains(deviceAddress)) {
+            if (!discoveredDevices.contains(deviceAddress) && matchesPrefix) {
                 discoveredDevices.add(deviceAddress);
-                deviceCount++;
-                updateDeviceCount();
-            } else if (allowedMacAddresses.contains(deviceAddress.toUpperCase()) && !discoveredDevices.contains(deviceAddress)) {
-                discoveredDevices.add(deviceAddress);
-                deviceCount++;
-                updateDeviceCount();
             }
         }
 
@@ -107,4 +100,8 @@ public class BluetoothDeviceTracker {
             super.onScanFailed(errorCode);
         }
     };
+
+    public interface BleScanCallback {
+        void onBleScanResultsAvailable(int numPeople);
+    }
 }
