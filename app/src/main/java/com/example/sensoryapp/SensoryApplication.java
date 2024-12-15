@@ -5,6 +5,9 @@ import android.util.Log;
 
 import androidx.lifecycle.ViewModelProvider;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class SensoryApplication extends Application {
     private static AlgorithmViewModel _algorithmViewModel;
     public static float dbCount = 40;
@@ -16,6 +19,8 @@ public class SensoryApplication extends Application {
     public static float avgDb = 0;
     public static float soundPref = 40;
     public static float numPeoplePref = 18;
+    private static Set<String> selectedUnderstimOptions = null;
+    private static Set<String> selectedOverstimOptions = null;
 
     @Override
     public void onCreate() {
@@ -43,5 +48,29 @@ public class SensoryApplication extends Application {
 
     public static void setAverageDbCount(float averageDb) {
         avgDb = averageDb;
+    }
+
+    public static Set<String> getUnderstimOptions() {
+        if (selectedUnderstimOptions == null) {
+            selectedUnderstimOptions = new HashSet<>();
+            selectedUnderstimOptions.add("restaurant");
+        }
+        return selectedUnderstimOptions;
+    }
+
+    public static Set<String> getOverstimOptions() {
+        if (selectedOverstimOptions == null) {
+            selectedOverstimOptions = new HashSet<>();
+            selectedOverstimOptions.add("cafe");
+        }
+        return selectedOverstimOptions;
+    }
+
+    public static void setUnderstimOptions(Set<String> options) {
+        selectedUnderstimOptions = options;
+    }
+
+    public static void setOverstimOptions(Set<String> options) {
+        selectedOverstimOptions = options;
     }
 }
