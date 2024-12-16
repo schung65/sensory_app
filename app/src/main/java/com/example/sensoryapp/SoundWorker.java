@@ -15,17 +15,14 @@ import androidx.core.app.NotificationCompat;
 import androidx.work.CoroutineWorker;
 import androidx.work.Data;
 import androidx.work.ForegroundInfo;
-import androidx.work.OneTimeWorkRequest;
-import androidx.work.WorkManager;
 import androidx.work.WorkerParameters;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 import kotlin.coroutines.Continuation;
 
-public class SoundLvlWorker extends CoroutineWorker {
+public class SoundWorker extends CoroutineWorker {
     private static final int RECORDING_DURATION = 3000; // 3 seconds
     private static final int SAMPLE_INTERVAL = 100; // Sample every 100 ms (0.1 seconds)
     private static final String CHANNEL_ID = "SoundWorkerChannel";
@@ -35,7 +32,7 @@ public class SoundLvlWorker extends CoroutineWorker {
     private PowerManager.WakeLock wakeLock;
     Context mContext;
 
-    public SoundLvlWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public SoundWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         Log.d("SoundWorker", "Constructor");
         mContext = context;

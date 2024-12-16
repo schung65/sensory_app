@@ -1,32 +1,21 @@
 package com.example.sensoryapp;
 
-import static android.provider.Settings.System.getString;
-
 import android.app.Application;
-import android.content.Context;
 import android.location.Location;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.Observer;
 import androidx.work.OneTimeWorkRequest;
 import androidx.work.WorkInfo;
 import androidx.work.WorkManager;
-import androidx.work.WorkRequest;
 
 import com.google.android.libraries.places.api.model.Place;
 
-import java.lang.reflect.Array;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class AlgorithmViewModel extends AndroidViewModel {
@@ -38,13 +27,13 @@ public class AlgorithmViewModel extends AndroidViewModel {
     public final MutableLiveData<String> mood = new MutableLiveData<>("Good");
 
     private MapWorker mapWorker;
-    private BluetoothDeviceTracker bleWorker;
+    private BluetoothWorker bleWorker;
 
     public AlgorithmViewModel(@NonNull Application application) {
         super(application);
         workManager = WorkManager.getInstance(application);
         mapWorker = new MapWorker();
-        bleWorker = new BluetoothDeviceTracker(getApplication().getApplicationContext());
+        bleWorker = new BluetoothWorker(getApplication().getApplicationContext());
     }
 
     public LiveData<List<Place>> getPlacesData() { return _placesLiveData; }
@@ -55,9 +44,9 @@ public class AlgorithmViewModel extends AndroidViewModel {
     }
 
     private void startSoundWorker() {
-        OneTimeWorkRequest soundWorkRequest = new OneTimeWorkRequest.Builder(SoundLvlWorker.class)
+        OneTimeWorkRequest soundWorkRequest = new OneTimeWorkRequest.Builder(SoundWorker.class)
                 .setInitialDelay(30, TimeUnit.SECONDS)
-                .addTag("SoundLvlWorker")
+                .addTag("SoundWorker")
                 .build();
         WorkManager.getInstance(getApplication().getApplicationContext()).enqueue(soundWorkRequest);
 
@@ -65,7 +54,7 @@ public class AlgorithmViewModel extends AndroidViewModel {
             if (workInfo != null) {
                 WorkInfo.State state = workInfo.getState();
                 if (state == WorkInfo.State.SUCCEEDED) {
-                    bleWorker.startScanning(new BluetoothDeviceTracker.BleScanCallback() {
+                    bleWorker.startScanning(new BluetoothWorker.BleScanCallback() {
                         @Override
                         public void onBleScanResultsAvailable(int numPeople) {
                             predictMood(SensoryApplication.avgDb, numPeople);
@@ -79,13 +68,13 @@ public class AlgorithmViewModel extends AndroidViewModel {
         });
 
         isWorkerRunning.setValue(true);
-        Log.d("AlgorithmViewModel", "SoundLvlWorker started");
+        Log.d("AlgorithmViewModel", "SoundWorker started");
     }
 
     private void stopSoundWorker() {
-        workManager.cancelAllWorkByTag("SoundLvlWorker");
+        workManager.cancelAllWorkByTag("SoundWorker");
         isWorkerRunning.setValue(false);
-        Log.d("AlgorithmViewModel", "SoundLvlWorker stopped");
+        Log.d("AlgorithmViewModel", "SoundWorker stopped");
     }
 
     public void getNearbyPlaces(String[] keywords) {

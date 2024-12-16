@@ -8,14 +8,13 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.Handler;
 import android.util.Log;
-import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
 
 import java.util.HashSet;
 import java.util.Set;
 
-public class BluetoothDeviceTracker {
+public class BluetoothWorker {
 
     private static final int SCAN_DURATION = 5000; // 5 seconds
     private static final int SCAN_INTERVAL = 60000; // 1 minute (60000 milliseconds)
@@ -56,7 +55,7 @@ public class BluetoothDeviceTracker {
             "CE:10"                             // Realtek Bluetooth (headphones/earphones)
     };
 
-    public BluetoothDeviceTracker(Context context) {
+    public BluetoothWorker(Context context) {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         bluetoothLeScanner = bluetoothAdapter.getBluetoothLeScanner();
         discoveredDevices = new HashSet<>();
@@ -71,11 +70,11 @@ public class BluetoothDeviceTracker {
     }
 
     public void startScanning(BleScanCallback callback) {
-        Log.d("BluetoothDeviceTracker", "starting scan");
+        Log.d("BluetoothWorker", "starting scan");
         discoveredDevices.clear();
         deviceCount = 0;
         if (ActivityCompat.checkSelfPermission(mContext, android.Manifest.permission.BLUETOOTH_SCAN) != PackageManager.PERMISSION_GRANTED) {
-            Log.d("BluetoothDeviceTracker", "Need permission: BLUETOOTH_SCAN");
+            Log.d("BluetoothWorker", "Need permission: BLUETOOTH_SCAN");
         }
         bluetoothLeScanner.startScan(scanCallback);
         handler.postDelayed(() -> {

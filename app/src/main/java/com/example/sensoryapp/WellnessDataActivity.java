@@ -2,13 +2,11 @@ package com.example.sensoryapp;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
@@ -17,7 +15,7 @@ import com.google.android.material.appbar.MaterialToolbar;
 
 public class WellnessDataActivity extends AppCompatActivity {
     private TextView nearbyDevicesValue;
-    private BluetoothDeviceTracker bluetoothDeviceTracker;
+    private BluetoothWorker bluetoothDeviceTracker;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
