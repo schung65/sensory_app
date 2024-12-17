@@ -209,7 +209,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void showNotification(String s) {
         Intent intent = new Intent(this, MainActivity.class);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        // Update this line to add FLAG_IMMUTABLE (since we don't need to modify the PendingIntent)
+        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
 
         NotificationCompat.Builder builder = new NotificationCompat.Builder(getApplicationContext(), CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_exclamation_mark)
